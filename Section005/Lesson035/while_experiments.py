@@ -1,4 +1,4 @@
-"""With experiments."""
+"""While experiments."""
 
 x = 0
 while x < 5:

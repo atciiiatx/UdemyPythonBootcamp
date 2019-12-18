@@ -44,13 +44,18 @@ def init_game():
 
 def print_board(board):
     """Print the game board."""
+    print('-------------')
     last = len(board) - 1
     for i in range(0, 3):
-        print(f'{board[last-2]}{board[last-1]}{board[last]}')
+
+        print('|   |   |   |')
+        print(f'| {board[last-2]} | {board[last-1]} | {board[last]} |')
+        print('|   |   |   |')
+        print('-------------')
         last -= 3
 
 
-def get_selection(board):
+def get_selection(ps, board):
     """Let the user pick a square."""
     selection = -1
     while selection < 0:
@@ -66,45 +71,49 @@ def get_selection(board):
 
 
 def game_over_horizontal(board):
-    """Determine whether the game is over."""
-    for player in ['X', 'O']:
-        # Check for horizontal
-        start = 0
-        for i in range(0, 3):
-            count = 0
-            for j in range(0, 3):
-                if board[start+j] == player:
-                    count += 1
-            if count == 3:
-                return [True, 'Horizontal win by ' + player]
-            start += 3
+    """Check for horizontal win"""
+    start = 0
+    for i in range(0, 3):
+        count = 0
+        player = board[start]
+        for j in range(0, 3):
+            if board[start+j] == player:
+                count += 1
+        if count == 3:
+            return [True, 'Horizontal win by ' + player]
+        start += 3
     return [False, 'Nobody won']
 
 
 def game_over_vertical(board):
-    """Determine whether the game is over."""
-    for player in ['X', 'O']:
-        # Check for horizontal
-        start = 0
-        for i in range(0, 3):
-            count = 0
-            for j in range(0, 3):
-                if board[start+3*j] == player:
-                    count += 1
-            if count == 3:
-                return [True, 'Vertical win by ' + player]
-            start += 1
+    """Check for vertical win."""
+    start = 0
+    for i in range(0, 3):
+        count = 0
+        player = board[start]
+        for j in range(0, 3):
+            if board[start+3*j] == player:
+                count += 1
+        if count == 3:
+            return [True, 'Vertical win by ' + player]
+        start += 1
     return [False, 'Nobody won']
 
 
 def game_over_diagonal(board):
     """Determine whether the game is over."""
-    for p in ['X', 'O']:
-        if board[0] == p and board[4] == p and board[8] == p:
-            return [True, 'Diagonal win by ' + p]
-        if board[2] == p and board[4] == p and board[6] == p:
-            return [True, 'Diagonal win by ' + p]
-        return [False, 'Nobody won']
+    if ((board[0] == board[4] and board[4] == board[8]) or
+            (board[2] == board[4] and board[4] == board[6])):
+        return [True, 'Diagonal win by ' + board[4]]
+    return [False, 'Nobody won']
+
+
+def game_over_no_moves(board):
+    """Determine whether there are no moves yet."""
+    for p in board:
+        if p != 'X' and p != 'O':
+            return [False, "Moves available"]
+    return [True, "No moves left. Nobody won."]
 
 
 def game_over(board):
@@ -116,18 +125,26 @@ def game_over(board):
     if result[0]:
         return result
     result = game_over_diagonal(board)
+    if result[0]:
+        return result
+    result = game_over_no_moves(board)
     return result
 
 
-greet()
-while get_play_choice():
+def play_game():
+    """Play a round of the game."""
     board, player_symbols = init_game()
     player_number = 0
     while not game_over(board)[0]:
         ps = player_symbols[player_number]
         print_board(board)
-        sel = get_selection(board)
+        sel = get_selection(ps, board)
         board[sel] = ps
         player_number = (player_number + 1) % 2
     print(f'Game over. {game_over(board)[1]}')
+
+
+greet()
+while get_play_choice():
+    play_game()
 print('Goodbye')
